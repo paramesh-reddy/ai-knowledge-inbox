@@ -1,0 +1,6 @@
+{
+  "name": "AI Knowledge Inbox",
+  "description": "Minimal AI Knowledge Inbox with asynchronous document ingestion, PostgreSQL-backed job queue, pgvector RAG retrieval, and grounded Gemini source citations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

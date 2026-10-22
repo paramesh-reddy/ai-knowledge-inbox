@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-knowledge-inbox"
+version = "0.1.0"
+description = "Minimal AI Knowledge Inbox with asynchronous document processing, pgvector RAG retrieval, and grounded Gemini source citations."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "sqlalchemy>=2.0.28",
+    "aiosqlite>=0.20.0",
+    "psycopg[binary]>=3.1.18",
+    "pgvector>=0.2.5",
+    "google-genai>=2.4.0",
+    "pymupdf>=1.23.26",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27.0",
+    "alembic>=1.13.1",
+    "numpy>=1.26.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.1.0",
+    "pytest-asyncio>=0.23.5",
+    "ruff>=0.3.4",
+    "mypy>=1.9.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]

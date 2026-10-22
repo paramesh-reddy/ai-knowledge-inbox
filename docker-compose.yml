@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: knowledge_inbox_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: knowledge_inbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d knowledge_inbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    container_name: knowledge_inbox_api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - FRONTEND_ORIGIN=http://localhost:5173
+      - DATABASE_URL=postgresql+psycopg://postgres:postgrespassword@postgres:5432/knowledge_inbox
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-3.8-flash
+      - GEMINI_EMBEDDING_MODEL=gemini-embedding-2-preview
+      - EMBEDDING_DIMENSIONS=768
+      - UPLOAD_DIR=/app/uploads
+      - MAX_FILE_SIZE_MB=10
+      - CHUNK_SIZE=1000
+      - CHUNK_OVERLAP=150
+      - RETRIEVAL_TOP_K=5
+      - RETRIEVAL_MIN_SCORE=0.35
+      - JOB_MAX_RETRIES=3
+    volumes:
+      - uploads_data:/app/uploads
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: knowledge_inbox_worker
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+psycopg://postgres:postgrespassword@postgres:5432/knowledge_inbox
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-3.8-flash
+      - GEMINI_EMBEDDING_MODEL=gemini-embedding-2-preview
+      - EMBEDDING_DIMENSIONS=768
+      - UPLOAD_DIR=/app/uploads
+      - MAX_FILE_SIZE_MB=10
+      - CHUNK_SIZE=1000
+      - CHUNK_OVERLAP=150
+      - JOB_MAX_RETRIES=3
+      - JOB_POLL_INTERVAL_SECONDS=2
+      - JOB_STALE_TIMEOUT_SECONDS=300
+    volumes:
+      - uploads_data:/app/uploads
+
+volumes:
+  postgres_data:
+  uploads_data:
